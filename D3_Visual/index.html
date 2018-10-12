@@ -84,15 +84,15 @@
           .then(function(data)
           {
             myData = data
-            generateBarData(myData, null)   // master data and item to filter
+            generateBarChart(myData, null)   // master data and item to filter
             createBarChart(BarData);
-            generateChorData(myData, null)
+            generateMap(myData, null)
             showMap(MapData)
           }
         );
       }
       
-      function generateBarData(masterData, state) {
+      function generateBarChart(allData, state) {
        // console.log(state + "  State Bar Chart \n")
 
         if(state === 'all' || state === 'All' || state === null){
@@ -102,7 +102,7 @@
                       .rollup(function(d) { 
                         return d3.sum(d, function(g) {return g.Amount; });
                       })
-                      .entries(masterData)
+                      .entries(allData)
                       .sort(function(a, b){ return d3.ascending(a.values, b.values); });
           BarData.sort(function (a, b) {return a.value - b.value;})
         }else{
@@ -122,7 +122,7 @@
                       .rollup(function(d) { 
                         return d3.sum(d, function(g) {return g.Amount; });
                       })
-                      .entries(masterData.filter(function(d) {return d.State_Code === state;}))
+                      .entries(allData.filter(function(d) {return d.State_Code === state;}))
                       .sort(function(a, b){ return d3.ascending(a.values, b.values); });
           BarData.sort(function (a, b) {return a.value - b.value;})
         }
@@ -130,7 +130,7 @@
         // console.log(BarData)
       }
 
-      function generateChorData(masterData, type) {
+      function generateMap(allData, type) {
           // console.log(type)
         if(type === null || type === 'All' || type === 'all'){
           $("#Damtype").html("All");
@@ -141,8 +141,8 @@
                        // console.log(d)
                         return d3.sum(d, function(g) {return g.Amount; });
                       })
-                      // .entries(masterData)
-                      .entries(masterData)
+                      // .entries(allData)
+                      .entries(allData)
                       .sort(function(a, b){ return d3.ascending(a.values, b.values); });
                       //console.log(MapData)
           MapData.sort(function (a, b) {return a.value - b.value;})
@@ -151,7 +151,7 @@
                       .key(function(g) { {return g.State_Abv; }
                       //  // return d3.sum(d, function(g) {return g.Amount; });
                        })
-                      .entries(masterData);
+                      .entries(allData);
                       
                      // console.log(AbvData[1].values[0].key)   
                        }else{
@@ -162,7 +162,7 @@
                       .rollup(function(d) { 
                         return d3.sum(d, function(g) {return g.Amount; });
                       })
-                      .entries(masterData.filter(function(d) {return d.Damage_Descp === type;}))
+                      .entries(allData.filter(function(d) {return d.Damage_Descp === type;}))
                       // .sort(function(a, b){ return d3.ascending(a.values, b.values); });
           // MapData.sort(function (a, b) {return a.value - b.value;})
           AbvData= d3.nest()
@@ -170,7 +170,7 @@
                       .key(function(g) { {return g.State_Abv; }
                       //  // return d3.sum(d, function(g) {return g.Amount; });
                        })
-                      .entries(masterData); 
+                      .entries(allData); 
         }
         // console.log("CHOR CHART DATA\n")
         MapData.filter(function(d,i) {
@@ -244,7 +244,7 @@
             .attr("class", "myrect")
             .on("mouseover", function(d,i) {
                 // console.log(d.key)
-              generateChorData(myData,d.key)
+              generateMap(myData,d.key)
               showMap(MapData)
               return tooltip.style("visibility", "visible").text('Amount: ' + chartData[i].value+" "+"Damage_desc: "+chartData[i].key) ;
   })
@@ -256,16 +256,11 @@
   // we hide our tooltip on "mouseout"
   
   .on("mouseout", function(d) {
-    generateChorData(myData,null)
+    generateMap(myData,null)
               showMap(MapData);
     return tooltip.style("visibility", "hidden");
   });
-            // })
-            // .on("mouseout", function(d) {
-            //     // console.log(d.key)
-            //   generateChorData(myData,null)
-            //   showMap(MapData);
-            // })
+          
       }
       
       function showMap(MapData){
@@ -360,12 +355,12 @@
                   .on("mouseover", function(d) {
                       
                       removeBarChart()
-                      generateBarData(myData, d.id);
+                      generateBarChart(myData, d.id);
                       createBarChart(BarData)
                         })
                   .on("mouseout", function(d) {
                       removeBarChart()
-                      generateBarData(myData, null);
+                      generateBarChart(myData, null);
                       createBarChart(BarData)
                   })
                   .attr("fill", function(d) { return color((d.amount = losses.get(d.id))/10000000); })
@@ -373,22 +368,23 @@
                   .append("title")
                   //console.log(AbvData)
                    .text(function(d) {//console.log(AbvData[4]);
-                    console.log(d)
+                    //console.log(d)
                    for(var i=0;i<AbvData.length;i++){
                      
                      if(AbvData[i].key==d.id){
-                       //console.log(AbvData[i].key)
+                       //console.log(AbvData[i].values[0].key)
                        return 'State_Abv: '+AbvData[i].values[0].key+ 'value: '+d.amount;
                      }
                      
                    }
+                   console.log(AbvData)
                     //if (AbvData[1].key==d.id){
                     // console.log(AbvData);
                       //  return 'State_Abv: '+d.id/*AbvData[i].values[0].key*/+ 'value: '+d.amount;
                         //}
                         })
                         //console.log(MapData[1].value)
-                      //console.log(masterData);
+                      //console.log(allData);
             // })
         }
       }
